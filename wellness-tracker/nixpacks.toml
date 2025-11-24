@@ -1,0 +1,32 @@
+# Configuración manual para forzar PHP 8.1 y evitar errores de detección
+
+[phases.setup]
+# Aquí forzamos la instalación de PHP 8.1 y Composer
+nixPkgs = ["php81", "php81Packages.composer", "nodejs-18_x"]
+
+[phases.build]
+# Comandos para preparar el proyecto
+cmds = [
+    "npm install",
+    "npm run prod",
+    # --ignore-platform-reqs es CLAVE para que no se queje de la versión de PHP
+    "composer install --no-dev --ignore-platform-reqs --optimize-autoloader",
+    "php artisan optimize:clear",
+    "php artisan config:cache",
+    "php artisan route:cache",
+    "php artisan view:cache",
+    "php artisan storage:link"
+]
+
+[start]
+# Comando para arrancar el servidor
+# Incluimos la migración aquí para asegurar que la BD esté lista al iniciar
+cmd = "php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=$PORT"
+```
+
+3.  **Sube este archivo a GitHub:**
+    Abre tu terminal en la carpeta del proyecto y ejecuta:
+    ```bash
+    git add nixpacks.toml
+    git commit -m "Agregar configuracion nixpacks para forzar PHP 8.1"
+    git push origin main
